@@ -23,18 +23,20 @@ body {
   overflow: hidden;
 }
 
+/* Logo no topo */
 .logo {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 20px; /* Espaço entre o logo e o card */
   z-index: 10;
   width: 100%;
 }
 
 .logo img {
-  max-width: 280px;
+  max-width: 280px; /* Reduzi um pouco para caber melhor na lateral */
   width: 80%;
 }
 
+/* Container principal */
 .main-container {
   display: flex;
   width: 100%;
@@ -44,10 +46,11 @@ body {
   transition: all 0.6s ease;
 }
 
+/* Form */
 .form-side {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Faz o logo ficar em cima e o card embaixo */
   justify-content: center;
   align-items: center;
   transition: all 0.6s ease;
@@ -55,6 +58,7 @@ body {
   padding: 20px;
 }
 
+/* PDF */
 .pdf-side {
   width: 0%;
   height: 100vh;
@@ -67,6 +71,7 @@ body {
   background: #f5f5f5;
 }
 
+/* Quando mostrar PDF */
 .showing-pdf .form-side {
   flex: 0 0 40%;
 }
@@ -75,8 +80,10 @@ body {
   width: 60%;
   opacity: 1;
   padding: 40px;
+  /* padding-top: 100px;  <-- Pode remover ou diminuir essa linha se quiser o PDF mais alto */
 }
 
+/* Card */
 .card {
   background: #ffffff;
   padding: 40px;
@@ -167,6 +174,7 @@ iframe {
   background: #fff;
 }
 
+/* Mobile */
 @media (max-width: 768px) {
   .showing-pdf .main-container { 
     flex-direction: column; 
@@ -189,13 +197,13 @@ iframe {
 <div class="main-container">
   
   <div class="form-side">
+    <!-- O LOGO AGORA FICA AQUI DENTRO -->
     <div class="logo">
       <img src="logo.png" alt="DBnet Internet Fibra">
     </div>
 
     <div class="card">
-      <div class="icon-circle">🔒</div>
-      <h2>Acesso ao Boleto</h2>
+      <div class="icon-circle">🔒</div>      <h2>Acesso ao Boleto</h2>
       <p>Informe seu CPF para visualizar</p>
 
       <input type="text" id="cpf" placeholder="000.000.000-00">
@@ -238,32 +246,22 @@ async function enviarCPF() {
       body: JSON.stringify({ cpf: cpf })
     });
 
-    if (!response.ok) {
-      throw new Error("Erro na resposta do servidor");
-    }
-
     const data = await response.json();
 
-    if (!data || !data.pdf) {
+    if (!data.pdf) {
       status.css("color", "red").text("Nenhum boleto encontrado.");
+      btn.prop("disabled", false);
       return;
     }
 
     const cleanBase64 = data.pdf.replace(/^data:application\/pdf;base64,/, "");
-
-    if (!cleanBase64.startsWith("JVBER")) {
-      status.css("color", "red").text("Nenhum boleto encontrado.");
-      return;
-    }
-
     $("#pdfViewer").attr("src", "data:application/pdf;base64," + cleanBase64 + "#view=FitH");
     
     $("body").addClass("showing-pdf");
-    status.css("color", "#8cc63f").text("Boleto gerado com sucesso!");
+    status.css("color", "#8cc63f").text("Boleto gerado!");
 
   } catch (error) {
-    console.error(error);
-    status.css("color", "red").text("Erro de conexão com o servidor.");
+    status.css("color", "red").text("Erro de conexão.");
   } finally {
     btn.prop("disabled", false);
   }
