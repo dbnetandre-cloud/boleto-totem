@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DBnet - Tudo de ON</title>
+<title>Confirme seu CPF - DBnet</title>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
@@ -226,6 +226,8 @@ $(document).ready(function(){
   $('#cpf').mask('000.000.000-00');
 });
 
+let cpfGlobal = "";
+
 async function enviarCPF() {
   const cpf = $("#cpf").val();
   const status = $("#status");
@@ -236,51 +238,112 @@ async function enviarCPF() {
     return;
   }
 
-  status.css("color", "#000").text("Buscando boleto...");
+  cpfGlobal = cpf;
+  status.css("color", "#000").text("Verificando endereços...");
   btn.prop("disabled", true);
 
   try {
-    const response = await fetch("http://10.100.125.80:5678/webhook/pegarboleto", {
+    const response = await fetch("http://192.168.2.224:5678/webhook/verificar-endereco", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ cpf: cpf })
     });
 
     const data = await response.json();
+    const qtd = Number(data.qtdEnderecos);
+
+    if (!qtd || qtd === 0) {
+      status.css("color", "red").text("Nenhum cadastro encontrado.");
+      btn.prop("disabled", false);
+      return;
+    }
+
+    // ✅ CASO TENHA APENAS 1 ENDEREÇO
+    if (qtd === 1) {
+      buscarBoleto(data.idCliente1);
+      return;
+    }
+
+    // ✅ CASO TENHA 2 OU 3
+    if (qtd === 2 || qtd === 3) {
+      mostrarEnderecos(data, qtd);
+      btn.prop("disabled", false);
+    }
+
+  } catch (error) {
+    status.css("color", "red").text("Erro ao verificar endereços.");
+    btn.prop("disabled", false);
+  }
+}
+
+function mostrarEnderecos(data, qtd) {
+
+  let html = `
+    <div class="icon-circle">🏠</div>
+    <h2>Selecione o Endereço</h2>
+    <p>Encontramos ${qtd} cadastros</p>
+  `;
+
+  for (let i = 1; i <= qtd; i++) {
+
+    const id = data["idCliente" + i];
+    const rua = data["ruaCliente" + i];
+    const numero = data["numeroCasa" + i];
+
+    html += `
+      <div style="border:1px solid #ddd;padding:15px;margin-bottom:15px;border-radius:10px">
+        <strong>${rua}, ${numero}</strong><br><br>
+        <button class="btn-primary" onclick="buscarBoleto('${id}')">
+          Selecionar este cadastro
+        </button>
+      </div>
+    `;
+  }
+
+  html += `<button class="btn-secondary" onclick="location.reload()">Voltar</button>`;
+
+  $(".card").html(html);
+}
+
+async function buscarBoleto(idCliente) {
+
+  $("#status").css("color", "#000").text("Buscando boleto...");
+
+  try {
+    const response = await fetch("http://192.168.2.224:5678/webhook/pegar-boleto", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        cpf: cpfGlobal,
+        idCliente: idCliente
+      })
+    });
+
+    const data = await response.json();
 
     if (!data.pdf) {
-      status.css("color", "red").text("Nenhum boleto encontrado.");
-      btn.prop("disabled", false);
+      alert("Nenhum boleto encontrado.");
       return;
     }
 
     const cleanBase64 = data.pdf.replace(/^data:application\/pdf;base64,/, "");
     $("#pdfViewer").attr("src", "data:application/pdf;base64," + cleanBase64 + "#view=FitH");
-    
+
     $("body").addClass("showing-pdf");
-    status.css("color", "#8cc63f").text("Boleto gerado!");
 
   } catch (error) {
-    status.css("color", "red").text("Erro de conexão.");
-  } finally {
-    btn.prop("disabled", false);
+    alert("Erro ao buscar boleto.");
   }
 }
 
 function novaPesquisa() {
-  $("body").removeClass("showing-pdf");
-  $("#cpf").val("");
-  $("#status").text("");
-  setTimeout(() => {
-    $("#pdfViewer").attr("src", "");
-  }, 600);
+  location.reload();
 }
 
 $("#cpf").keypress(function(e) {
   if(e.which == 13) enviarCPF();
 });
 </script>
-
 </body>
-
 </html>
+
