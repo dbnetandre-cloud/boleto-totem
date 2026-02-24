@@ -173,6 +173,62 @@ iframe {
   border: 1px solid #ddd;
   background: #fff;
 }
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.numpad button {
+  padding: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #f5f5f5;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.numpad button:hover {
+  background: #8cc63f;
+  color: #fff;
+}
+
+.btn-delete {
+  background: #000;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s ease;
+}
+
+.icon-delete {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  transition: 0.2s ease;
+}
+
+/* Hover */
+.btn-delete:hover {
+  background: #8cc63f;
+}
+
+.btn-delete:hover .icon-delete {
+  content: url("excluir branco.png");
+}
+.btn-enter {
+  background: #8cc63f;
+  color: #000;
+}
+
+.btn-enter:hover {
+  background: #000;
+}
 
 /* Mobile */
 @media (max-width: 768px) {
@@ -207,6 +263,26 @@ iframe {
       <p>Informe seu CPF para visualizar</p>
 
       <input type="text" id="cpf" placeholder="000.000.000-00">
+      
+      <div class="numpad">
+  <button onclick="addNumero('1')">1</button>
+  <button onclick="addNumero('2')">2</button>
+  <button onclick="addNumero('3')">3</button>
+
+  <button onclick="addNumero('4')">4</button>
+  <button onclick="addNumero('5')">5</button>
+  <button onclick="addNumero('6')">6</button>
+
+  <button onclick="addNumero('7')">7</button>
+  <button onclick="addNumero('8')">8</button>
+  <button onclick="addNumero('9')">9</button>
+
+ <button class="btn-delete" onclick="apagarNumero()">
+  <img src="excluir preto.png" class="icon-delete">
+</button>
+  <button onclick="addNumero('0')">0</button>
+  <button class="btn-enter" onclick="enviarCPF()">ENTER</button>
+</div>
 
       <button class="btn-primary" id="btnGerar" onclick="enviarCPF()">GERAR BOLETO</button>
       <button class="btn-secondary" onclick="novaPesquisa()">NOVA PESQUISA</button>
@@ -243,7 +319,7 @@ async function enviarCPF() {
   btn.prop("disabled", true);
 
   try {
-    const response = await fetch("http://10.100.125.80:5678/webhook/verificar-endereco", {
+    const response = await fetch("http://192.168.2.224:5678/webhook/verificar-endereco", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ cpf: cpf })
@@ -310,7 +386,7 @@ async function buscarBoleto(idCliente) {
   $("#status").css("color", "#000").text("Buscando boleto...");
 
   try {
-    const response = await fetch("http://10.100.125.80:5678/webhook/pegar-boleto", {
+    const response = await fetch("http://192.168.2.224:5678/webhook/pegar-boleto", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
@@ -343,8 +419,26 @@ function novaPesquisa() {
 $("#cpf").keypress(function(e) {
   if(e.which == 13) enviarCPF();
 });
-</script>
+
+function addNumero(numero) {
+  const cpfInput = $("#cpf");
+  let apenasNumeros = cpfInput.val().replace(/\D/g, "");
+
+  if (apenasNumeros.length >= 11) return;
+
+  apenasNumeros += numero;
+
+  cpfInput.val(apenasNumeros).trigger("input");
+}
+
+function apagarNumero() {
+  const cpfInput = $("#cpf");
+  let apenasNumeros = cpfInput.val().replace(/\D/g, "");
+
+  apenasNumeros = apenasNumeros.slice(0, -1);
+
+  cpfInput.val(apenasNumeros).trigger("input");
+}</script>
 </body>
 </html>
-
 
