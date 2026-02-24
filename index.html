@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Confirme seu CPF - DBnet</title>
+<title>Boleto Fácil - DBnet</title>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
@@ -17,26 +19,35 @@
 }
 
 body {
-  background: #ffffff;
-  height: 100vh;
-  color: #000;
-  overflow: hidden;
+  background: 
+    linear-gradient(rgba(255,255,255,0.75), rgba(255,255,255,0.01)),
+    url("background.png") no-repeat center center fixed;
+  background-size: cover;
+}
+/* Logo no topo
+ */
+ 
+ .card-logo {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
-/* Logo no topo */
+.card-logo img {
+  max-width: 180px;
+  width: 100%;
+  display: block;
+  margin: 0 auto;
+}
+
 .logo {
   text-align: center;
-  margin-bottom: 20px; /* Espaço entre o logo e o card */
-  z-index: 10;
-  width: 100%;
+  margin-bottom: 25px;
 }
 
 .logo img {
-  max-width: 280px; /* Reduzi um pouco para caber melhor na lateral */
-  width: 80%;
-}
-
-/* Container principal */
+  max-width: 260px;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+}/* Container principal */
 .main-container {
   display: flex;
   width: 100%;
@@ -95,19 +106,6 @@ body {
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
-.icon-circle {
-  width: 60px;
-  height: 60px;
-  background: #e8f5e9;
-  border: 2px solid #8cc63f;
-  border-radius: 50%;
-  margin: 0 auto 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  color: #8cc63f;
-}
 
 h2 { margin-bottom: 10px; font-size: 22px; }
 p { color: #555; font-size: 14px; margin-bottom: 25px; }
@@ -254,12 +252,13 @@ iframe {
   
   <div class="form-side">
     <!-- O LOGO AGORA FICA AQUI DENTRO -->
+    
+    <div class="card">
     <div class="logo">
       <img src="logo.png" alt="DBnet Internet Fibra">
     </div>
 
-    <div class="card">
-      <div class="icon-circle">🔒</div>      <h2>Acesso ao Boleto</h2>
+         
       <p>Informe seu CPF para visualizar</p>
 
       <input type="text" id="cpf" placeholder="000.000.000-00">
