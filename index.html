@@ -228,6 +228,54 @@ iframe {
   background: #000;
 }
 
+.custom-alert {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+
+  display: flex;              /* 🔥 usa flex sempre */
+  align-items: center;        /* centraliza vertical */
+  justify-content: center;    /* centraliza horizontal */
+
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.3s ease;
+
+  z-index: 9999;
+}
+
+.custom-alert.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.custom-alert-box {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+.custom-alert-box p {
+  font-size: 18px; /* 🔥 LETRA MAIOR */
+  margin-bottom: 20px;
+}
+
+.custom-alert-box button {
+  background: #8cc63f;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 /* Mobile */
 @media (max-width: 768px) {
   .showing-pdf .main-container { 
@@ -243,6 +291,8 @@ iframe {
     height: 500px; 
   }
 }
+
+
 </style>
 <body>
 
@@ -282,7 +332,9 @@ iframe {
 </div>
 
       <button class="btn-primary" id="btnGerar" onclick="enviarCPF()">GERAR BOLETO</button>
-      <button class="btn-secondary" onclick="novaPesquisa()">NOVA PESQUISA</button>
+      <button class="btn-secondary" id="btnNova" onclick="novaPesquisa()" style="display:none;">
+        NOVA PESQUISA
+      </button>
 
       <div class="status" id="status"></div>
     </div>
@@ -322,9 +374,11 @@ async function enviarCPF() {
   cpfGlobal = cpf;
   status.css("color", "#000").text("Verificando endereços...");
   btn.prop("disabled", true);
+  $("#btnGerar").hide();
+  $("#btnNova").show();
 
   try {
-    const response = await fetch("http://10.100.125.80:5678/webhook/consulta-ixc", {
+    const response = await fetch("http://192.168.2.224:5678/webhook/consulta-ixc", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ cpf: cpf })
@@ -414,11 +468,11 @@ function mostrarEnderecos(data, qtd) {
 }
 
 async function buscarBoleto(idCliente) {
-
+  
   $("#status").css("color", "#000").text("Buscando boleto...");
 
   try {
-    const response = await fetch("http://10.100.125.80:5678/webhook/pegar-boletos", {
+    const response = await fetch("http://192.168.2.224:5678/webhook/pegar-boleto", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
@@ -429,18 +483,36 @@ async function buscarBoleto(idCliente) {
 
     const data = await response.json();
 
-    if (!data.pdf) {
-      alert("Nenhum boleto encontrado.");
+    console.log("Resposta webhook boleto:", data); // 🔎 debug
+
+    // Força conversão segura
+    const qtdBoletos = Number(data.qtdBoletos ?? data.qtdboletos ?? 0);
+
+    // ✅ Se for zero
+    if (qtdBoletos === 0) {
+      mostrarAlerta("Nenhum boleto disponível para este cadastro.");
+      $("#status").text("");
+      return;
+    }
+
+    // ✅ Se tem boletos mas não veio PDF
+    if (!data.pdf || data.pdf.length < 50) {
+      alert("Boletos encontrados, mas o PDF não foi retornado corretamente.");
       return;
     }
 
     const cleanBase64 = data.pdf.replace(/^data:application\/pdf;base64,/, "");
-    $("#pdfViewer").attr("src", "data:application/pdf;base64," + cleanBase64 + "#view=FitH");
+
+    $("#pdfViewer").attr(
+      "src",
+      "data:application/pdf;base64," + cleanBase64 + "#view=FitH"
+    );
 
     $("body").addClass("showing-pdf");
 
   } catch (error) {
     alert("Erro ao buscar boleto.");
+    console.error(error);
   }
 }
 
@@ -470,6 +542,27 @@ function apagarNumero() {
   apenasNumeros = apenasNumeros.slice(0, -1);
 
   cpfInput.val(apenasNumeros).trigger("input");
-}</script>
+}
+
+
+function mostrarAlerta(msg) {
+  document.getElementById("customAlertText").innerText = msg;
+  document.getElementById("customAlert").classList.add("active");
+}
+
+function fecharAlerta() {
+  document.getElementById("customAlert").classList.remove("active");
+}
+
+
+</script>
+
+
+<div id="customAlert" class="custom-alert">
+  <div class="custom-alert-box">
+    <p id="customAlertText"></p>
+    <button onclick="fecharAlerta()">OK</button>
+  </div>
+</div>
 </body>
 </html>
