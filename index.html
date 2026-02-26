@@ -378,7 +378,7 @@ async function enviarCPF() {
   $("#btnNova").show();
 
   try {
-    const response = await fetch("http://192.168.2.224:5678/webhook/consulta-ixc", {
+    const response = await fetch("http://10.100.125.80:5678/webhook/consulta-ixc", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ cpf: cpf })
@@ -472,7 +472,7 @@ async function buscarBoleto(idCliente) {
   $("#status").css("color", "#000").text("Buscando boleto...");
 
   try {
-    const response = await fetch("http://192.168.2.224:5678/webhook/pegar-boleto", {
+    const response = await fetch("http://10.100.125.80:5678/webhook/pegar-boleto", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
@@ -566,3 +566,4 @@ function fecharAlerta() {
 </div>
 </body>
 </html>
+
