@@ -79,7 +79,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: transparent;
 }
 
 /* Quando mostrar PDF */
@@ -189,9 +189,23 @@ iframe {
   transition: 0.2s;
 }
 
-.numpad button:hover {
-  background: #8cc63f;
-  color: #fff;
+/* hover só no desktop */
+@media (hover: hover) {
+  .numpad button:hover {
+    background: #8cc63f;
+    color: #fff;
+  }
+}
+
+@keyframes flashGreen {
+  0%   { background: #f5f5f5; color: #000; }
+  30%  { background: #8cc63f; color: #fff; }
+  100% { background: #f5f5f5; color: #000; }
+}
+
+.numpad button.flash {
+  animation: flashGreen 0.5s ease;
+  /* sem forwards: volta ao estado original do CSS */
 }
 
 .btn-delete {
@@ -211,21 +225,45 @@ iframe {
   transition: 0.2s ease;
 }
 
-/* Hover */
-.btn-delete:hover {
-  background: #8cc63f;
-}
-
-.btn-delete:hover .icon-delete {
-  content: url("excluir branco.png");
-}
 .btn-enter {
   background: #8cc63f;
   color: #000;
 }
 
-.btn-enter:hover {
-  background: #000;
+/* Hover só no desktop */
+@media (hover: hover) {
+  .btn-delete:hover {
+    background: #8cc63f;
+  }
+  .btn-delete:hover .icon-delete {
+    content: url("excluir branco.png");
+  }
+  .btn-enter:hover {
+    background: #000;
+    color: #fff;
+  }
+}
+
+/* Flash apagar: preto → verde → preto */
+@keyframes flashDelete {
+  0%   { background: #000; }
+  30%  { background: #8cc63f; }
+  100% { background: #000; }
+}
+
+/* Flash enter: verde → preto → verde */
+@keyframes flashEnter {
+  0%   { background: #8cc63f; color: #000; }
+  30%  { background: #000;    color: #fff; }
+  100% { background: #8cc63f; color: #000; }
+}
+
+.btn-delete.flash {
+  animation: flashDelete 0.5s ease;
+}
+
+.btn-enter.flash {
+  animation: flashEnter 0.5s ease;
 }
 
 .custom-alert {
@@ -276,19 +314,161 @@ iframe {
   cursor: pointer;
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-  .showing-pdf .main-container { 
-    flex-direction: column; 
-    overflow-y: auto; 
+.pdf-mobile-bar { display: none; }
+
+/* ===== MOBILE ===== */
+@media (pointer: coarse) and (hover: none) {
+
+  body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  .showing-pdf .form-side { 
-    flex: 0 0 auto; 
-    padding-top: 120px; 
+
+  .main-container {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 16px;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
   }
-  .showing-pdf .pdf-side { 
-    width: 100%; 
-    height: 500px; 
+
+  .form-side {
+    flex: none;
+    width: 100%;
+    padding: 0;
+    justify-content: flex-start;
+  }
+
+  .card {
+    padding: 16px 16px 10px 16px;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .logo {
+    margin-bottom: 10px;
+  }
+
+  .logo img {
+    max-width: 160px;
+  }
+
+  p {
+    margin-bottom: 10px;
+  }
+
+  .status {
+    margin-top: 0;
+    min-height: 0;
+  }
+
+  .numpad {
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .numpad button {
+    padding: 18px 10px;
+    font-size: 22px;
+  }
+
+  input {
+    padding: 14px;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  /* Botões principais com padding lateral */
+  .btn-primary,
+  .btn-secondary {
+    padding: 14px;
+    font-size: 16px;
+    margin-bottom: 8px;
+    width: calc(100% - 32px);
+    margin-left: 16px;
+    margin-right: 16px;
+    border-radius: 10px;
+  }
+
+  /* PDF como overlay fullscreen no mobile */
+  .pdf-side {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 100;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    overflow: hidden;
+  }
+
+  /* Botão flutuante nova pesquisa */
+  .pdf-mobile-bar {
+    position: fixed;
+    bottom: max(24px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    background: transparent;
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+  .pdf-mobile-bar button {
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: bold;
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    letter-spacing: 0.5px;
+  }
+
+  .showing-pdf .pdf-mobile-bar {
+    display: flex;
+    z-index: 9999;
+  }
+
+  /* iframe ocupa tela inteira sem margens */
+  .pdf-side iframe {
+    flex: 1;
+    width: 100vw;
+    min-height: 0;
+    height: 0;
+    border-radius: 0;
+    border: none;
+    display: block;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  /* Quando mostra PDF — overlay aparece */
+  .showing-pdf .pdf-side {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Form continua atrás normalmente */
+  .showing-pdf .main-container {
+    flex-direction: column;
+  }
+
+  .showing-pdf .form-side {
+    display: none;
   }
 }
 
@@ -309,26 +489,26 @@ iframe {
          
       <p>Informe seu CPF para visualizar</p>
 
-      <input type="text" id="cpf" placeholder="000.000.000-00">
+      <input type="text" id="cpf" placeholder="000.000.000-00" readonly inputmode="none">
       
       <div class="numpad">
-  <button onclick="addNumero('1')">1</button>
-  <button onclick="addNumero('2')">2</button>
-  <button onclick="addNumero('3')">3</button>
+  <button onclick="addNumero('1', this)">1</button>
+  <button onclick="addNumero('2', this)">2</button>
+  <button onclick="addNumero('3', this)">3</button>
 
-  <button onclick="addNumero('4')">4</button>
-  <button onclick="addNumero('5')">5</button>
-  <button onclick="addNumero('6')">6</button>
+  <button onclick="addNumero('4', this)">4</button>
+  <button onclick="addNumero('5', this)">5</button>
+  <button onclick="addNumero('6', this)">6</button>
 
-  <button onclick="addNumero('7')">7</button>
-  <button onclick="addNumero('8')">8</button>
-  <button onclick="addNumero('9')">9</button>
+  <button onclick="addNumero('7', this)">7</button>
+  <button onclick="addNumero('8', this)">8</button>
+  <button onclick="addNumero('9', this)">9</button>
 
- <button class="btn-delete" onclick="apagarNumero()">
+ <button class="btn-delete" onclick="apagarNumero(this)">
   <img src="excluir preto.png" class="icon-delete">
 </button>
-  <button onclick="addNumero('0')">0</button>
-  <button class="btn-enter" onclick="enviarCPF()">ENTER</button>
+  <button onclick="addNumero('0', this)">0</button>
+  <button class="btn-enter" onclick="flashBtn(this); enviarCPF()">ENTER</button>
 </div>
 
       <button class="btn-primary" id="btnGerar" onclick="enviarCPF()">GERAR BOLETO</button>
@@ -341,6 +521,9 @@ iframe {
   </div>
 
   <div class="pdf-side">
+    <div class="pdf-mobile-bar">
+      <button onclick="novaPesquisa()">🔍 Nova Pesquisa</button>
+    </div>
     <iframe id="pdfViewer"></iframe>
   </div>
 
@@ -453,7 +636,7 @@ function mostrarEnderecos(data, qtd) {
         <br>
 
         <button class="btn-primary"
-          onclick="buscarBoleto('${id}')"
+          onclick="flashBtn(this); buscarBoleto('${id}')"
           ${!ativo ? "disabled style='opacity:0.6;cursor:not-allowed'" : ""}
         >
           Selecionar este cadastro
@@ -503,12 +686,26 @@ async function buscarBoleto(idCliente) {
 
     const cleanBase64 = data.pdf.replace(/^data:application\/pdf;base64,/, "");
 
-    $("#pdfViewer").attr(
-      "src",
-      "data:application/pdf;base64," + cleanBase64 + "#view=FitH"
-    );
+    // Converte base64 → Blob → URL (necessário para mobile/iOS/Android)
+    const byteChars = atob(cleanBase64);
+    const byteNumbers = new Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) {
+      byteNumbers[i] = byteChars.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: "application/pdf" });
+    const blobUrl = URL.createObjectURL(blob);
 
-    $("body").addClass("showing-pdf");
+    // iOS Safari não renderiza PDF em iframe — abre direto no navegador
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    if (isIOS) {
+      window.open(blobUrl, "_blank");
+      $("#status").css("color", "green").text("Boleto aberto em nova aba.");
+    } else {
+      $("#pdfViewer").attr("src", blobUrl + "#toolbar=0&navpanes=0&view=FitH&zoom=page-width");
+      $("body").addClass("showing-pdf");
+    }
 
   } catch (error) {
     alert("Erro ao buscar boleto.");
@@ -520,11 +717,27 @@ function novaPesquisa() {
   location.reload();
 }
 
+// Bloqueia teclado nativo no mobile
+$("#cpf").on("focus mousedown touchstart", function(e) {
+  e.preventDefault();
+  this.blur();
+  // Reaplica foco visual sem abrir teclado
+  $(this).css("border-color", "#8cc63f").css("box-shadow", "0 0 0 2px rgba(140,198,63,0.2)");
+});
+
 $("#cpf").keypress(function(e) {
   if(e.which == 13) enviarCPF();
 });
 
-function addNumero(numero) {
+function flashBtn(el) {
+  el.classList.remove("flash");
+  void el.offsetWidth; // força reflow para reiniciar animação
+  el.classList.add("flash");
+  setTimeout(() => el.classList.remove("flash"), 400);
+}
+
+function addNumero(numero, el) {
+  if (el) flashBtn(el);
   const cpfInput = $("#cpf");
   let apenasNumeros = cpfInput.val().replace(/\D/g, "");
 
@@ -535,7 +748,8 @@ function addNumero(numero) {
   cpfInput.val(apenasNumeros).trigger("input");
 }
 
-function apagarNumero() {
+function apagarNumero(el) {
+  if (el) flashBtn(el);
   const cpfInput = $("#cpf");
   let apenasNumeros = cpfInput.val().replace(/\D/g, "");
 
@@ -566,4 +780,3 @@ function fecharAlerta() {
 </div>
 </body>
 </html>
-
