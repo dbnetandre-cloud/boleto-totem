@@ -24,21 +24,6 @@ body {
     url("background.png") no-repeat center center fixed;
   background-size: cover;
 }
-/* Logo no topo
- */
- 
- .card-logo {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.card-logo img {
-  max-width: 180px;
-  width: 100%;
-  display: block;
-  margin: 0 auto;
-}
-
 .logo {
   text-align: center;
   margin-bottom: 25px;
@@ -225,11 +210,6 @@ iframe {
   transition: 0.2s ease;
 }
 
-.btn-enter {
-  background: #8cc63f;
-  color: #000;
-}
-
 /* Hover só no desktop */
 @media (hover: hover) {
   .btn-delete:hover {
@@ -237,10 +217,6 @@ iframe {
   }
   .btn-delete:hover .icon-delete {
     content: url("excluir branco.png");
-  }
-  .btn-enter:hover {
-    background: #000;
-    color: #fff;
   }
 }
 
@@ -251,19 +227,8 @@ iframe {
   100% { background: #000; }
 }
 
-/* Flash enter: verde → preto → verde */
-@keyframes flashEnter {
-  0%   { background: #8cc63f; color: #000; }
-  30%  { background: #000;    color: #fff; }
-  100% { background: #8cc63f; color: #000; }
-}
-
 .btn-delete.flash {
   animation: flashDelete 0.5s ease;
-}
-
-.btn-enter.flash {
-  animation: flashEnter 0.5s ease;
 }
 
 .custom-alert {
@@ -723,10 +688,6 @@ $("#cpf").on("focus mousedown touchstart", function(e) {
   this.blur();
   // Reaplica foco visual sem abrir teclado
   $(this).css("border-color", "#8cc63f").css("box-shadow", "0 0 0 2px rgba(140,198,63,0.2)");
-});
-
-$("#cpf").keypress(function(e) {
-  if(e.which == 13) enviarCPF();
 });
 
 function flashBtn(el) {
