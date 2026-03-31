@@ -504,11 +504,11 @@ iframe {
   <button onclick="addNumero('8', this)">8</button>
   <button onclick="addNumero('9', this)">9</button>
 
- <button class="btn-delete" onclick="apagarNumero(this)">
-  <img src="excluir preto.png" class="icon-delete">
-</button>
+  <button style="font-size: 16px;" onclick="limparTudo(this)">LIMPAR</button>
   <button onclick="addNumero('0', this)">0</button>
-  <button class="btn-enter" onclick="flashBtn(this); enviarCPF()">ENTER</button>
+  <button class="btn-delete" onclick="apagarNumero(this)">
+    <img src="excluir preto.png" class="icon-delete">
+  </button>
 </div>
 
       <button class="btn-primary" id="btnGerar" onclick="enviarCPF()">GERAR BOLETO</button>
@@ -756,6 +756,12 @@ function apagarNumero(el) {
   apenasNumeros = apenasNumeros.slice(0, -1);
 
   cpfInput.val(apenasNumeros).trigger("input");
+}
+
+function limparTudo(el) {
+  if (el) flashBtn(el);
+  const cpfInput = $("#cpf");
+  cpfInput.val("").trigger("input");
 }
 
 
